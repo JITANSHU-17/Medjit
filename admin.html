@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    /* [ Same styles as before – not changed ] */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(to right, #eef2f3, #8e9eab);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      color: #2f2f30;
+      margin-bottom: 10px;
+      font-size: 2.2rem;
+    }
+
+    h4 {
+      color: #4b4b4b;
+      margin-bottom: 30px;
+    }
+
+    .top-nav {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .top-nav a button {
+      background-color: #2f2f30;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .top-nav a button:hover {
+      background-color: #444;
+    }
+
+    form {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    form input[type="text"],
+    form input[type="number"] {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    form button[type="submit"] {
+      background-color: #007bff;
+      color: white;
+      padding: 12px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    form button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    .product-list {
+      margin-top: 40px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .product-item {
+      background: white;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .product-item .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .product-item span {
+      font-size: 1.1rem;
+      color: #333;
+    }
+
+    .product-item input {
+      padding: 6px;
+      font-size: 0.95rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-right: 6px;
+    }
+
+    .product-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .edit-btn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .search-input {
+      margin-top: 30px;
+      margin-bottom: 10px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .search-input input {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .order-section {
+      width: 100%;
+      max-width: 600px;
+      margin-top: 30px;
+    }
+
+    .order-toggle {
+      background-color: #6c63ff;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .order-list {
+      display: none;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .order-item {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      margin-bottom: 20px;
+    }
+
+    .order-item:last-child {
+      border-bottom: none;
+    }
+
+    @media (max-width: 600px) {
+      .top-nav {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .product-item .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .product-actions {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-nav">
+    <a href="index.html"><button>🏠 Home</button></a>
+    <a href="/logout"><button>🚪 Logout</button></a>
+  </div>
+
+  <h1>Welcome Back, Admin</h1>
+  <h4>Add Products</h4>
+
+  <form action="/add-product" method="POST">
+    <input type="text" name="name" placeholder="Medicine Name" required />
+    <input type="number" name="price" placeholder="Price (in ₹)" required />
+    <input type="number" name="quantity" placeholder="Quantity" required />
+    <button type="submit">➕ Add Product</button>
+  </form>
+
+  <div class="search-input">
+    <input type="text" id="searchBox" placeholder="🔍 Search products"></input>
+  </div>
+
+  <div class="order-section">
+    <button class="order-toggle" onclick="toggleOrders()">📦 Show Orders</button>
+    <div class="order-list" id="orderList"></div>
+  </div>
+
+  <div class="product-list" id="productList"></div>
+
+<script>
+  <script type="module">
+import {
+  createProduct,
+  updateProduct,
+  deleteProduct as deleteProductAPI,
+  getAllProducts,
+  getAllOrders
+} from './api.js';
+
+const productList = document.getElementById("productList"); 
+const searchBox = document.getElementById("searchBox");
+const orderList = document.getElementById("orderList");
+
+async function loadProducts() {
+  const data = await getAllProducts();
+  const products = data.results;
+  renderProducts(products);
+}
+
+function renderProducts(products) {
+  const filter = searchBox.value.toLowerCase();
+  productList.innerHTML = "";
+  products
+    .filter(p => p.name.toLowerCase().includes(filter))
+    .forEach(p => {
+      const div = document.createElement("div");
+      div.className = "product-item";
+      div.innerHTML = `
+        <div class="info-row">
+          <span><strong>Name:</strong> <input value="${p.name}" id="name-${p.objectId}"/></span>
+          <span><strong>Price:</strong> ₹<input type="number" value="${p.price}" id="price-${p.objectId}" style="width:80px;"/></span>
+          <span><strong>Qty:</strong> <input type="number" value="${p.quantity}" id="quantity-${p.objectId}" style="width:60px;"/></span>
+        </div>
+        <div class="product-actions">
+          <button class="edit-btn" onclick="editProduct('${p.objectId}')">✏️ Save</button>
+          <button class="delete-btn" onclick="deleteProduct('${p.objectId}')">🗑️ Delete</button>
+        </div>
+      `;
+      productList.appendChild(div);
+    });
+}
+
+window.editProduct = async function(id) {
+  await updateProduct(id, {
+    name: document.getElementById(`name-${id}`).value,
+    price: parseFloat(document.getElementById(`price-${id}`).value),
+    quantity: parseInt(document.getElementById(`quantity-${id}`).value)
+  });
+  loadProducts();
+}
+
+window.deleteProduct = async function(id) {
+  if (!confirm("Delete this product?")) return;
+  await deleteProductAPI(id);
+  loadProducts();
+}
+
+window.toggleOrders = function() {
+  orderList.style.display = orderList.style.display === "block" ? "none" : (loadOrders(), "block");
+}
+
+async function loadOrders() {
+  const data = await getAllOrders();
+  const orders = data.results;
+
+  const grouped = {};
+  orders.forEach(o => {
+    const key = `${o.phone}|${o.created_at}`;
+    (grouped[key] = grouped[key] || []).push(o);
+  });
+
+  orderList.innerHTML = `<h3>Total Groups: ${Object.keys(grouped).length}</h3>`;
+  Object.entries(grouped).forEach(([key, group]) => {
+    const [phone, created_at] = key.split("|");
+    const totalSum = group.reduce((a,b)=>a + b.price*b.quantity,0);
+
+    const div = document.createElement("div");
+    div.className = "order-item";
+
+    let html = `
+      <strong>📞 Phone:</strong> ${phone} &nbsp;|&nbsp;
+      <strong>🕒 Time:</strong> ${new Date(created_at).toLocaleString()}<br/><br/>
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><th align="left">Medicine</th><th>Qty</th><th>Unit ₹</th><th>Total ₹</th></tr>`;
+    group.forEach(it => {
+      html += `<tr>
+                 <td>${it.medicine_name}</td>
+                 <td align="center">${it.quantity}</td>
+                 <td align="right">${it.price}</td>
+                 <td align="right">${it.quantity * it.price}</td>
+               </tr>`;
+    });
+    html += `</table><br/>
+             <strong>Group Total: ₹${totalSum}</strong>
+             <div style="margin-top:8px;">
+               <button class="edit-btn" onclick='downloadGroupReceipt("${encodeURIComponent(key)}")'>🧾 Receipt</button>
+               <button class="delete-btn" onclick='deleteGroup("${encodeURIComponent(key)}")'>🗑️ Delete Group</button>
+             </div>`;
+
+    div.innerHTML = html;
+    orderList.appendChild(div);
+  });
+}
+
+window.deleteGroup = function(keyEnc) {
+  alert("Back4App: Implement group deletion using class-level batch delete or individual fetch-by-group keys.");
+}
+
+window.downloadGroupReceipt = function(keyEnc) {
+  const key = decodeURIComponent(keyEnc);
+  fetch(`/orders?groupKey=${key}`)
+    .then(res => res.json())
+    .then(group => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const [phone, orderTime] = key.split("|");
+      const date = new Date(orderTime).toLocaleString();
+
+      doc.setFontSize(16);
+      doc.text("🧾 Group Receipt", 20, 20);
+      doc.setFontSize(12);
+      doc.text(`Phone: ${phone}`, 20, 30);
+      doc.text(`Time: ${date}`, 20, 40);
+      let y=50;
+      let total=0;
+      group.forEach(item=>{
+        const line = `${item.medicine_name} x ${item.quantity} = ₹${item.quantity*item.price}`;
+        doc.text(line, 20, y);
+        total+=item.quantity*item.price; y+=10;
+      });
+      doc.text(`Total: ₹${total}`, 20, y+10);
+      doc.save(`receipt_${phone}_${new Date(orderTime).getTime()}.pdf`);
+    });
+}
+
+searchBox.addEventListener("input", loadProducts);
+loadProducts();
+</script>
+
+</script>
+</body>
+</html>
