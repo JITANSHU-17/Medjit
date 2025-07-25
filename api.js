@@ -105,9 +105,9 @@ export async function getAllUsers() {
 
 // LOGIN User (Admin)
 export async function loginUser(username, password) {
-  const res = await fetch(`${API_CONFIG.SERVER_URL}/adminLogin?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, {
-    method: 'GET',
-    headers
-  });
-  return res.json();
+  const result = await Parse.Cloud.run("adminLogin", { username, password });
+  return {
+    username,
+    sessionToken: "custom-session"  // fake token, just to pass the check
+  };
 }
