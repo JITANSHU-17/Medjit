@@ -106,36 +106,34 @@
   <script type="module">
     import { loginUser } from './api.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('loginForm');
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
 
-    const username = form.username.value.trim();
-    const password = form.password.value;
+  if (!username || !password) {
+    alert('Please enter both username and password.');
+    return;
+  }
 
-    if (!username || !password) {
-      alert('⚠️ Please enter both username and password.');
-      return;
+  try {
+    const isValid = await loginUser(username, password);
+
+    if (isValid) {
+      // Optional: Store admin flag
+      localStorage.setItem('isAdmin', 'true');
+      localStorage.setItem('adminUser', username);
+
+      // Redirect to admin panel
+      window.location.href = '/admin.html';
+    } else {
+      alert('Invalid credentials. Please try again.');
     }
-
-    try {
-      const user = await loginUser(username, password);
-
-      if (user?.sessionToken) {
-        // Save session and redirect
-        localStorage.setItem('sessionToken', user.sessionToken);
-        localStorage.setItem('adminUser', user.username);
-        window.location.href = '/admin.html';
-      } else {
-        alert('❌ Invalid login. Please try again.');
-      }
-
-    } catch (err) {
-      alert(`🚫 Login failed: ${err.message || err}`);
-    }
-  });
+  } catch (err) {
+    console.error('Login error:', err);
+    alert('❌ Login failed: ' + err);
+  }
 });
 
     </script>
