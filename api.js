@@ -105,9 +105,19 @@ export async function getAllUsers() {
 
 // LOGIN User (Admin)
 export async function loginUser(username, password) {
-  const result = await Parse.Cloud.run("adminLogin", { username, password });
-  return {
-    username,
-    sessionToken: "custom-session"  // fake token, just to pass the check
-  };
+  try {
+    const result = await Parse.Cloud.run("adminLogin", { username, password });
+
+    // Ensure result contains needed info
+    if (result.success && result.sessionToken) {
+      return {
+        sessionToken: result.sessionToken,
+        username: result.username
+      };
+    } else {
+      throw new Error(result.message || "Login failed");
+    }
+  } catch (err) {
+    throw err;
+  }
 }
