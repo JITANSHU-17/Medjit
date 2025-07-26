@@ -105,26 +105,30 @@
     </form>
   </div>
   <script type="module">
-    import { loginUser } from './api.js';
+    // ✅ Init Parse SDK
+Parse.initialize("Wbf4aGT4IL7fUpgHrYwCmSug1vj12Gya3BJpn8Q9", "tH9nXCOEK8tO8injltEtxhlaFUJsiFoNM4ua9R3T");
+Parse.serverURL = "https://parseapi.back4app.com";
 
+// ✅ Login form handler
 document.getElementById('loginForm').addEventListener('submit', async function (e) {
   e.preventDefault();
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
 
   try {
-    const user = await loginUser(username, password);
-    if (user && user.sessionToken) {
-      localStorage.setItem('sessionToken', user.sessionToken);
-      localStorage.setItem('adminUser', user.username);
+    const result = await Parse.Cloud.run("adminLogin", { username, password });
+    if (result.success && result.sessionToken) {
+      localStorage.setItem('sessionToken', result.sessionToken);
+      localStorage.setItem('adminUser', result.username);
       window.location.href = '/admin.html';
     } else {
-      alert('Invalid login. Please try again.');
+      alert("Login failed: " + result.message);
     }
   } catch (err) {
-    alert('❌ Login failed: ' + err.message);
+    alert("❌ Login failed: " + err.message);
   }
 });
+
 
     </script>
 </body>
