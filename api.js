@@ -1,3 +1,5 @@
+import Parse from 'parse/dist/parse.min.js'; // ✅ correct for frontend
+
 const API_CONFIG = {
   APP_ID: 'Wbf4aGT4IL7fUpgHrYwCmSug1vj12Gya3BJpn8Q9',
   REST_API_KEY: 'tFaRTvQUNVFN739bH218945ax0QxTOgHHQcNPovT',
@@ -102,6 +104,9 @@ export async function getAllUsers() {
 }
 
 // ===================== Auth APIs =====================
+
+Parse.initialize("Wbf4aGT4IL7fUpgHrYwCmSug1vj12Gya3BJpn8Q9", "tH9nXCOEK8tO8injltEtxhlaFUJsiFoNM4ua9R3T");
+Parse.serverURL = "https://parseapi.back4app.com";
 
 // LOGIN User (Admin)
 export async function loginUser(username, password) {
