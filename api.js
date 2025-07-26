@@ -1,4 +1,3 @@
-import Parse from 'parse/dist/parse.min.js'; // ✅ correct for frontend
 
 const API_CONFIG = {
   APP_ID: 'Wbf4aGT4IL7fUpgHrYwCmSug1vj12Gya3BJpn8Q9',
@@ -103,26 +102,3 @@ export async function getAllUsers() {
   return res.json();
 }
 
-// ===================== Auth APIs =====================
-
-Parse.initialize("Wbf4aGT4IL7fUpgHrYwCmSug1vj12Gya3BJpn8Q9", "tH9nXCOEK8tO8injltEtxhlaFUJsiFoNM4ua9R3T");
-Parse.serverURL = "https://parseapi.back4app.com";
-
-// LOGIN User (Admin)
-export async function loginUser(username, password) {
-  try {
-    const result = await Parse.Cloud.run("adminLogin", { username, password });
-
-    // Ensure result contains needed info
-    if (result.success && result.sessionToken) {
-      return {
-        sessionToken: result.sessionToken,
-        username: result.username
-      };
-    } else {
-      throw new Error(result.message || "Login failed");
-    }
-  } catch (err) {
-    throw err;
-  }
-}
