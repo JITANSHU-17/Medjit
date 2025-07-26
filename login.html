@@ -108,31 +108,20 @@
 
 document.getElementById('loginForm').addEventListener('submit', async function (e) {
   e.preventDefault();
-
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
 
-  if (!username || !password) {
-    alert('Please enter both username and password.');
-    return;
-  }
-
   try {
-    const isValid = await loginUser(username, password);
-
-    if (isValid) {
-      // Optional: Store admin flag
-      localStorage.setItem('isAdmin', 'true');
-      localStorage.setItem('adminUser', username);
-
-      // Redirect to admin panel
+    const user = await loginUser(username, password);
+    if (user && user.sessionToken) {
+      localStorage.setItem('sessionToken', user.sessionToken);
+      localStorage.setItem('adminUser', user.username);
       window.location.href = '/admin.html';
     } else {
-      alert('Invalid credentials. Please try again.');
+      alert('Invalid login. Please try again.');
     }
   } catch (err) {
-    console.error('Login error:', err);
-    alert('❌ Login failed: ' + err);
+    alert('❌ Login failed: ' + err.message);
   }
 });
 
